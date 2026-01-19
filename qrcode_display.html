@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HFNC压力计算器 - 二维码</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .qrcode-wrapper {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            min-width: 400px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #qrcode {
+            display: inline-block;
+        }
+        
+        #qrcode canvas,
+        #qrcode img {
+            max-width: 100%;
+            height: auto;
+            border: 4px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .url-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #1976d2;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        .instructions strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #1565c0;
+        }
+        
+        .link-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+        
+        .link-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HFNC压力计算器</h1>
+        <p class="subtitle">高流量鼻导管氧疗气道压力预测计算器<br>使用微信扫描二维码，快速访问</p>
+        
+        <div class="qrcode-wrapper">
+            <div id="qrcode"></div>
+        </div>
+        
+        <div id="status-message"></div>
+        
+        <div class="url-info">
+            <strong>访问地址：</strong><br>
+            <span id="url-display">正在检测...</span>
+        </div>
+        
+        <a href="#" 
+           id="link-button"
+           target="_blank" 
+           class="link-button">
+            直接打开计算器
+        </a>
+        
+        <div class="instructions">
+            <strong>应用说明：</strong>
+            本计算器用于高流量鼻导管氧疗（HFNC）时，根据测压管压力（PA）和流速（FR）预测气道压力（PC）。<br><br>
+            <strong>使用说明：</strong>
+            1. 使用微信扫描上方二维码<br>
+            2. 或点击"直接打开计算器"按钮<br>
+            3. 二维码已优化，扫描后快速响应<br>
+            4. 建议在WiFi环境下使用，体验更佳
+        </div>
+    </div>
+    
+    <script>
+        // 自动检测当前URL或手动配置
+        // 支持多种部署平台：Netlify、GitHub Pages、Vercel等
+        let calculatorUrl;
+        
+        const hostname = window.location.hostname;
+        
+        if (hostname.includes('netlify.app')) {
+            // Netlify部署：自动检测
+            calculatorUrl = `${window.location.protocol}//${hostname}/index.html`;
+            console.log('自动检测到Netlify URL:', calculatorUrl);
+        } else if (hostname.includes('github.io')) {
+            // GitHub Pages部署：自动检测
+            calculatorUrl = `${window.location.protocol}//${hostname}/index.html`;
+            console.log('自动检测到GitHub Pages URL:', calculatorUrl);
+        } else if (hostname.includes('vercel.app')) {
+            // Vercel部署：自动检测
+            calculatorUrl = `${window.location.protocol}//${hostname}/index.html`;
+            console.log('自动检测到Vercel URL:', calculatorUrl);
+        } else {
+            // 手动配置（如果自动检测失败，请修改下面的URL）
+            // 方案1：GitHub Pages（推荐，国内可访问）
+            // 格式：https://用户名.github.io/仓库名/index.html
+            // calculatorUrl = 'https://您的用户名.github.io/hfnc-calculator/index.html';
+            
+            // 方案2：Netlify（需要VPN）
+            const netlifyProjectName = 'hfnc-pressure'; // 请根据您的实际项目名称修改
+            calculatorUrl = `https://${netlifyProjectName}.netlify.app/index.html`;
+            
+            // 方案3：Vercel（国内访问较稳定）
+            // calculatorUrl = 'https://您的项目名.vercel.app/index.html';
+            
+            console.log('使用手动配置的URL:', calculatorUrl);
+        }
+        
+        // 显示URL
+        document.getElementById('url-display').textContent = calculatorUrl;
+        document.getElementById('link-button').href = calculatorUrl;
+        
+        // 生成优化的二维码（针对微信扫描优化）
+        function generateQRCode() {
+            const qrcodeDiv = document.getElementById("qrcode");
+            const statusDiv = document.getElementById('status-message');
+            
+            // 清空容器
+            qrcodeDiv.innerHTML = '';
+            
+            try {
+                // 使用QRCode库生成二维码
+                // 优化参数：增大尺寸、最高纠错级别、增加边距
+                new QRCode(qrcodeDiv, {
+                    text: calculatorUrl,
+                    width: 400,  // 增大尺寸，提高扫描成功率
+                    height: 400,
+                    colorDark: "#000000",  // 纯黑色，提高对比度
+                    colorLight: "#ffffff", // 纯白色背景
+                    correctLevel: QRCode.CorrectLevel.H, // 最高纠错级别（30%）
+                    margin: 4,  // 增加边距（quiet zone），提高识别率
+                    useSVG: false  // 使用canvas，兼容性更好
+                });
+                
+                // 显示成功消息
+                statusDiv.innerHTML = '<div class="success-message">✅ 二维码生成成功！请使用微信扫描</div>';
+                statusDiv.className = '';
+                
+                console.log('二维码生成成功，URL:', calculatorUrl);
+                
+                // 验证二维码是否真的生成
+                setTimeout(function() {
+                    const canvas = qrcodeDiv.querySelector('canvas');
+                    const img = qrcodeDiv.querySelector('img');
+                    if (!canvas && !img) {
+                        throw new Error('二维码元素未生成');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('二维码生成失败:', error);
+                statusDiv.innerHTML = `
+                    <div class="error-message">
+                        <strong>❌ 二维码生成失败</strong><br>
+                        错误信息：${error.message}<br><br>
+                        <strong>解决方案：</strong><br>
+                        1. 请刷新页面重试<br>
+                        2. 或使用在线二维码生成器：<br>
+                        <a href="https://www.qrcode-monkey.com/" target="_blank" style="color: #667eea;">
+                            QR Code Monkey
+                        </a><br>
+                        3. 直接访问：<a href="${calculatorUrl}" target="_blank" style="color: #667eea;">${calculatorUrl}</a>
+                    </div>
+                `;
+                statusDiv.className = 'error-message';
+            }
+        }
+        
+        // 测试URL是否可访问
+        function testUrlAccess() {
+            const statusDiv = document.getElementById('status-message');
+            
+            // 使用fetch测试URL（注意：可能受CORS限制，但不影响二维码）
+            fetch(calculatorUrl, { 
+                method: 'HEAD',
+                mode: 'no-cors'  // 避免CORS问题
+            })
+            .then(() => {
+                console.log('URL可访问');
+            })
+            .catch((error) => {
+                console.warn('URL测试失败（可能是CORS限制，但不影响使用）:', error);
+                // 不显示错误，因为CORS限制不代表URL不可用
+            });
+            
+            // 备用测试：尝试加载favicon
+            const testImg = new Image();
+            testImg.onload = function() {
+                console.log('网站可访问');
+            };
+            testImg.onerror = function() {
+                console.warn('网站可能无法访问，请检查部署状态');
+                // 不阻止二维码生成，让用户自己测试
+            };
+            testImg.src = calculatorUrl.replace('/index.html', '/favicon.ico') + '?t=' + Date.now();
+        }
+        
+        // 等待页面加载完成后再生成二维码
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // 延迟生成，确保库加载完成
+                setTimeout(function() {
+                    generateQRCode();
+                    testUrlAccess();
+                }, 300);
+            });
+        } else {
+            setTimeout(function() {
+                generateQRCode();
+                testUrlAccess();
+            }, 300);
+        }
+        
+        // 添加二维码下载功能（可选）
+        function downloadQRCode() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'hfnc_calculator_qrcode.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } else {
+                alert('二维码尚未生成，请稍候再试');
+            }
+        }
+        
+        // 添加下载按钮（可选功能）
+        // 可以在页面上添加一个下载按钮，方便保存二维码图片
+    </script>
+</body>
+</html>
